@@ -667,6 +667,11 @@
     <div class="modal-sub" id="oppModalSub">&nbsp;</div>
 
     <div class="field">
+      <label>Name</label>
+      <input type="text" id="oppNameInput" placeholder="Who reached out (optional, needed to send to Cadence)">
+    </div>
+
+    <div class="field">
       <label>Source (if known)</label>
       <select id="oppSourceSelect"></select>
     </div>
@@ -688,8 +693,10 @@
 
     <div class="modal-actions">
       <button class="btn-delete" id="oppDeleteBtn" onclick="deleteOpp()" style="display:none;">Delete</button>
-      <div></div>
-      <button class="btn-save" onclick="saveOpp()">Save</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-backup" id="oppCadenceBtn" onclick="sendOppToCadence()">&rarr; Network Cadence</button>
+        <button class="btn-save" onclick="saveOpp()">Save</button>
+      </div>
     </div>
   </div>
 </div>
@@ -896,7 +903,7 @@
     });
     state.opportunities.forEach(o => {
       const w = weekNumberFor(o.date);
-      if (w) buckets[w].push({ kind: 'opp', color: 'var(--rose)', id: o.id, note: o.note, status: o.status, sourceId: o.sourceId });
+      if (w) buckets[w].push({ kind: 'opp', color: 'var(--rose)', id: o.id, name: o.name, note: o.note, status: o.status, sourceId: o.sourceId });
     });
 
     const pointCoords = {}; // id -> {x,y}
@@ -990,7 +997,7 @@
         dot.setAttribute('fill', item.color);
         dot.setAttribute('class', 'signal-dot');
         const title = document.createElementNS(ns, 'title');
-        title.textContent = item.kind === 'opp' ? ('Lead — ' + (item.note || item.status)) : (TYPE_LABELS[item.kind] + ' — ' + item.label);
+        title.textContent = item.kind === 'opp' ? ('Lead — ' + (item.name || item.note || item.status)) : (TYPE_LABELS[item.kind] + ' — ' + item.label);
         dot.appendChild(title);
         dot.addEventListener('click', () => {
           if (item.kind === 'opp') openOppModal(item.id);
@@ -1266,6 +1273,7 @@
             <span class="opp-tag ${o.status}">${STATUS_LABELS[o.status]}</span>
             <span style="font-family:var(--font-display); font-size:12px; color:var(--text-faint);">${o.date || ''}</span>
           </div>
+          ${o.name ? `<div class="card-name" style="font-size:16px; margin-bottom:4px;">${escapeHtml(o.name)}${o.inCadence ? ' <span style="color:var(--mint); font-family:var(--font-display); font-size:10px; letter-spacing:0.05em; text-transform:uppercase;">In Cadence</span>' : ''}</div>` : ''}
           ${o.note ? `<div class="opp-note">${escapeHtml(o.note)}</div>` : ''}
           <div class="opp-meta">
             <span>${source ? 'From: ' + escapeHtml(source.label) : 'Source unknown'}</span>
@@ -1285,6 +1293,8 @@
 
     document.getElementById('oppModalSub').textContent = o ? ('Logged ' + (o.date || '—')) : 'New inbound opportunity';
     document.getElementById('oppDeleteBtn').style.display = o ? 'inline-block' : 'none';
+    document.getElementById('oppNameInput').value = o ? (o.name || '') : '';
+    document.getElementById('oppCadenceBtn').textContent = o && o.inCadence ? '✓ Sent to Network Cadence' : '→ Network Cadence';
 
     const select = document.getElementById('oppSourceSelect');
     const sorted = state.activities.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
@@ -1316,6 +1326,7 @@
   }
 
   function saveOpp() {
+    const name = document.getElementById('oppNameInput').value.trim();
     const date = document.getElementById('oppDateInput').value || todayStr();
     const note = document.getElementById('oppNoteInput').value.trim();
     const sourceId = document.getElementById('oppSourceSelect').value || null;
@@ -1324,9 +1335,9 @@
 
     if (activeOppId) {
       const o = state.opportunities.find(x => x.id === activeOppId);
-      if (o) { o.date = date; o.note = note; o.sourceId = sourceId; o.status = status; }
+      if (o) { o.name = name; o.date = date; o.note = note; o.sourceId = sourceId; o.status = status; }
     } else {
-      state.opportunities.push({ id: uid('o'), date, note, sourceId, status });
+      state.opportunities.push({ id: uid('o'), name, date, note, sourceId, status });
     }
     persist();
     render();
@@ -1339,6 +1350,53 @@
     persist();
     render();
     closeOppModal();
+  }
+
+  function sendOppToCadence() {
+    const name = document.getElementById('oppNameInput').value.trim();
+    if (!name) {
+      alert('Add a name first so Network Cadence knows who this is.');
+      document.getElementById('oppNameInput').focus();
+      return;
+    }
+    const date = document.getElementById('oppDateInput').value || todayStr();
+    const note = document.getElementById('oppNoteInput').value.trim();
+    const sourceId = document.getElementById('oppSourceSelect').value || null;
+    const source = sourceId ? state.activities.find(a => a.id === sourceId) : null;
+
+    const notesParts = [];
+    if (source) notesParts.push('From ' + TYPE_LABELS[source.type].toLowerCase() + ': ' + source.label);
+    if (note) notesParts.push(note);
+    notesParts.push('(via Sprint)');
+
+    const params = new URLSearchParams({
+      addName: name,
+      addNotes: notesParts.join(' — '),
+      addLast: date
+    });
+    window.open('https://cristinadigiacomo.github.io/network-cadence/?' + params.toString(), '_blank');
+
+    // Save first (creating the opp if new) so the inCadence flag has something to attach to.
+    saveOppSilently(name, date, note, sourceId);
+  }
+
+  function saveOppSilently(name, date, note, sourceId) {
+    const activeStatusBtn = document.querySelector('#oppStatusRow .status-btn.active');
+    const status = activeStatusBtn ? activeStatusBtn.dataset.status : 'new';
+    let o;
+    if (activeOppId) {
+      o = state.opportunities.find(x => x.id === activeOppId);
+      if (o) { o.name = name; o.date = date; o.note = note; o.sourceId = sourceId; o.status = status; }
+    } else {
+      o = { id: uid('o'), name, date, note, sourceId, status };
+      state.opportunities.push(o);
+      activeOppId = o.id;
+    }
+    if (o) o.inCadence = true;
+    persist();
+    render();
+    document.getElementById('oppCadenceBtn').textContent = '✓ Sent to Network Cadence';
+    document.getElementById('oppDeleteBtn').style.display = 'inline-block';
   }
 
   // ============================================================
