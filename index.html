@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sprint</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sprint">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #121212;
+    --surface: #1a1a1a;
+    --surface-raised: #202020;
+    --border: #2e2e2e;
+    --border-light: #3a3a3a;
+    --text: #f2f2ef;
+    --text-dim: #ffffff;
+    --text-faint: #ffffff;
+    --mint: #5fe3a8;
+    --mint-dim: #2d5c48;
+    --amber: #d4a24c;
+    --sky: #7fb8e0;
+    --sky-dim: #2d4a5c;
+    --rose: #c1666b;
+    --rose-dim: #4a2c2e;
+    --red-dim: #8a5b52;
+    --font-display: 'IBM Plex Mono', 'Courier New', monospace;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    padding: 40px 32px 100px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1320px; margin: 0 auto; }
+
+  /* ---------- HEADER ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 32px;
+    letter-spacing: 0.2px;
+    color: #ffffff;
+    text-transform: none;
+  }
+
+  h1 span { display: block; color: var(--text-faint); font-weight: 400; font-size: 14px; text-transform: none; letter-spacing: normal; font-family: var(--font-body); margin-top: 4px; opacity: 0.75; }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .stats {
+    display: flex;
+    gap: 30px;
+    font-family: var(--font-display);
+  }
+
+  .stat { text-align: right; }
+  .stat-num { font-size: 30px; font-weight: 600; line-height: 1; }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    opacity: 0.7;
+    margin-top: 5px;
+  }
+  .stat-num.mint { color: var(--mint); }
+
+  .sync-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 10px;
+    background: var(--surface);
+    transition: border-color 0.15s ease;
+  }
+  .sync-status:hover { border-color: var(--border-light); }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .sync-status.synced .sync-dot { background: var(--mint); }
+  .sync-status.offline .sync-dot { background: var(--amber); }
+  .sync-status.signedout .sync-dot { background: var(--text-faint); }
+  .sync-status.syncing .sync-dot { background: var(--mint); animation: sync-pulse 1s ease-in-out infinite; }
+  .sync-status.error .sync-dot { background: var(--rose); }
+  @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* ---------- TABS ---------- */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    padding: 10px 18px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .tab-btn.active { border-color: var(--mint-dim); color: var(--mint); background: rgba(95,227,168,0.08); }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- SIGNAL MAP ---------- */
+  .map-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0 28px;
+  }
+  .map-svg { max-width: 100%; height: auto; }
+  .map-svg .ring-track { fill: none; stroke: var(--border); stroke-width: 1; transition: stroke 0.4s ease, stroke-width 0.4s ease, stroke-opacity 0.4s ease; }
+  .map-svg .ring-track.current { stroke: var(--mint-dim); stroke-width: 1.5; }
+  .map-svg .week-label {
+    font-family: var(--font-display);
+    font-size: 9px;
+    fill: var(--text-faint);
+    opacity: 0.55;
+  }
+  .map-svg .week-label.current { fill: var(--mint); opacity: 1; font-weight: 700; }
+  .map-svg .hub-dot { fill: var(--text); }
+  .map-svg .hub-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    fill: var(--text-faint);
+    opacity: 0.6;
+  }
+  .sweep-group { transform-origin: center; animation: sweep-rotate 26s linear infinite; }
+  @keyframes sweep-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .sweep-group { animation: none; } }
+  .map-svg .sweep-line { stroke: var(--mint); stroke-width: 1.5; opacity: 0.9; }
+  .map-svg .sweep-trail { fill: var(--mint); }
+  .map-svg .signal-dot { cursor: pointer; transition: r 0.15s ease; }
+  .map-svg .signal-dot:hover { r: 7; }
+  .map-svg .signal-glow { opacity: 0.35; }
+  .map-svg .convert-line { stroke: var(--mint); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.4; fill: none; }
+
+  .map-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 18px;
+  }
+  .map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .map-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .pace-note {
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    opacity: 0.75;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  /* ---------- WEEK LIST ---------- */
+  .week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .week-card.current { border-color: var(--mint-dim); }
+  .week-head {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-head-left { display: flex; align-items: baseline; gap: 12px; }
+  .week-num {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 19px;
+    color: var(--text);
+  }
+  .week-num.current { color: var(--mint); }
+  .week-range {
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--text-faint);
+    opacity: 0.7;
+  }
+  .week-count {
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--text-faint);
+    background: var(--surface-raised);
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .week-body { display: none; padding: 16px 18px 18px; }
+  .week-card.expanded .week-body { display: block; }
+  .week-card.expanded .week-chevron { transform: rotate(90deg); }
+  .week-chevron { font-family: var(--font-display); color: var(--text-faint); transition: transform 0.15s ease; }
+
+  .week-section { margin-bottom: 18px; }
+  .week-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .week-section-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .btn-mini {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 5px 10px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-mini:hover { border-color: var(--border-light); }
+  .btn-mini.mint { border-color: var(--mint-dim); color: var(--mint); }
+
+  .activity-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    background: var(--surface-raised);
+    border-radius: 4px;
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+  .activity-row:hover { background: var(--border); }
+  .activity-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .activity-dot.essay { background: var(--mint); }
+  .activity-dot.post { background: var(--amber); }
+  .activity-dot.event { background: var(--sky); }
+  .activity-label { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .activity-date { font-family: var(--font-display); font-size: 11px; color: var(--text-faint); flex-shrink: 0; }
+  .empty-hint-small {
+    color: var(--text-faint);
+    opacity: 0.6;
+    font-size: 13px;
+    font-style: italic;
+    padding: 8px 4px;
+  }
+
+  .week-note-field textarea {
+    width: 100%;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 50px;
+  }
+
+  .candidate-list { margin-top: 8px; }
+  .candidate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(95,227,168,0.06);
+    border: 1px dashed var(--mint-dim);
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  /* ---------- OPPORTUNITIES ---------- */
+  .opp-filters { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .opp-filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    padding: 7px 14px;
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .opp-filter-btn.active { border-color: var(--mint-dim); color: var(--mint); background: rgba(95,227,168,0.08); }
+
+  .opp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .opp-card:hover { border-color: var(--border-light); }
+  .opp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .opp-note { font-size: 15px; margin-bottom: 8px; }
+  .opp-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-display); font-size: 12px; color: var(--text-faint); }
+  .opp-tag {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 3px;
+  }
+  .opp-tag.new { background: rgba(127,184,224,0.15); color: var(--sky); }
+  .opp-tag.warm { background: rgba(212,162,76,0.15); color: var(--amber); }
+  .opp-tag.converted { background: rgba(95,227,168,0.15); color: var(--mint); }
+  .opp-tag.dead { background: rgba(255,255,255,0.06); color: var(--text-faint); }
+
+  .btn-add-opp {
+    background: var(--mint);
+    color: #0a1a13;
+    border: none;
+    padding: 12px 22px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 18px;
+  }
+
+  /* ---------- MODAL ---------- */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.active { display: flex; }
+
+  .modal {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 520px;
+    padding: 30px;
+    position: relative;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .modal-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .modal-sub { font-family: var(--font-display); font-size: 13px; color: var(--text-faint); margin-bottom: 22px; }
+
+  .type-row { display: flex; gap: 8px; margin-bottom: 22px; }
+  .type-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 11px 6px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .type-btn.active.essay { border-color: var(--mint); color: var(--mint); background: rgba(95,227,168,0.1); }
+  .type-btn.active.post { border-color: var(--amber); color: var(--amber); background: rgba(212,162,76,0.1); }
+  .type-btn.active.event { border-color: var(--sky); color: var(--sky); background: rgba(127,184,224,0.1); }
+
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 7px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 13px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    border-radius: 4px;
+    color-scheme: dark;
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--mint-dim); }
+
+  .status-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .status-btn {
+    flex: 1;
+    min-width: 80px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 11px 6px;
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .status-btn.active.new { border-color: var(--sky); color: var(--sky); background: rgba(127,184,224,0.1); }
+  .status-btn.active.warm { border-color: var(--amber); color: var(--amber); background: rgba(212,162,76,0.1); }
+  .status-btn.active.converted { border-color: var(--mint); color: var(--mint); background: rgba(95,227,168,0.1); }
+  .status-btn.active.dead { border-color: var(--text-faint); color: var(--text-dim); background: rgba(255,255,255,0.03); }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-delete { background: none; border: none; color: var(--text-faint); font-size: 14px; cursor: pointer; text-decoration: underline; }
+  .btn-delete:hover { color: var(--rose); }
+  .btn-save {
+    background: var(--mint);
+    color: #0a1a13;
+    border: none;
+    padding: 12px 26px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  /* ---------- Sync modal reuse ---------- */
+  .btn-backup {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-backup:hover { border-color: var(--border-light); color: var(--text); }
+
+  .status-msg {
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--text-faint);
+    text-align: center;
+    margin-top: 24px;
+  }
+  .backup-row { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+
+  @media (max-width: 640px) {
+    body { padding: 24px 16px 90px; }
+    .map-svg { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Sprint <span>/ visibility signal map</span></h1>
+    <div class="header-right">
+      <div class="stats">
+        <div class="stat"><div class="stat-num mint" id="stat-week">—</div><div class="stat-label">Week</div></div>
+        <div class="stat"><div class="stat-num" id="stat-activities">0</div><div class="stat-label">Logged</div></div>
+        <div class="stat"><div class="stat-num" id="stat-leads">0</div><div class="stat-label">Leads</div></div>
+      </div>
+      <div class="sync-status signedout" id="syncStatus">
+        <span class="sync-dot"></span>
+        <span id="syncStatusLabel">Sign in to sync</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-view="map">Signal Map</button>
+    <button class="tab-btn" data-view="weeks">Week List</button>
+    <button class="tab-btn" data-view="opps">Opportunities</button>
+  </div>
+
+  <div class="view active" id="view-map">
+    <div class="map-wrap">
+      <svg class="map-svg" id="mapSvg" width="560" height="560" viewBox="0 0 560 560"></svg>
+      <div class="map-legend" id="mapLegend"></div>
+      <div class="pace-note" id="paceNote"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-weeks">
+    <div id="weekListWrap"></div>
+  </div>
+
+  <div class="view" id="view-opps">
+    <button class="btn-add-opp" onclick="openOppModal(null)">+ Log opportunity</button>
+    <div class="opp-filters" id="oppFilters"></div>
+    <div id="oppListWrap"></div>
+  </div>
+
+  <div class="status-msg" id="status-msg">&nbsp;</div>
+  <div class="backup-row">
+    <button class="btn-backup" onclick="exportBackup()">Export backup</button>
+    <button class="btn-backup" onclick="triggerImport()">Import backup</button>
+    <input type="file" id="import-file-input" accept="application/json" style="display:none;" onchange="importBackup(this)">
+  </div>
+</div>
+
+<!-- Sync modal -->
+<div class="overlay" id="syncModalOverlay">
+  <div class="modal">
+    <div class="modal-title">Google Drive sync</div>
+    <div class="modal-sub" id="syncModalBody">Connect Google Drive so this dashboard stays the same on your phone and your laptop. Your data is stored in a hidden app folder in your Drive.</div>
+    <div class="modal-actions">
+      <div></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-backup" onclick="closeSyncModal()">Close</button>
+        <button class="btn-backup" id="syncNowBtn" style="display:none;" onclick="forceSyncNow()">Sync now</button>
+        <button class="btn-save" id="connectDriveBtn" onclick="requestSignIn()">Connect Google Drive</button>
+        <button class="btn-backup" id="disconnectDriveBtn" style="display:none;" onclick="disconnectDrive()">Disconnect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity modal (essay / post / event) -->
+<div class="overlay" id="activityModalOverlay">
+  <div class="modal">
+    <button class="btn-close" onclick="closeActivityModal()">&times;</button>
+    <div class="modal-title" id="activityModalTitle">Log activity</div>
+    <div class="modal-sub" id="activityModalSub">&nbsp;</div>
+
+    <div class="type-row" id="activityTypeRow"></div>
+
+    <div class="field">
+      <label id="activityLabelLabel">Title</label>
+      <input type="text" id="activityLabelInput">
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="activityDateInput">
+    </div>
+
+    <div class="field" id="activityUrlField">
+      <label id="activityUrlLabel">URL</label>
+      <input type="text" id="activityUrlInput" placeholder="https://…">
+    </div>
+
+    <div class="field" id="activityNoteField">
+      <label>What came of it</label>
+      <textarea id="activityNoteInput" placeholder="One line — what happened, who you met, next step"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-delete" id="activityDeleteBtn" onclick="deleteActivity()" style="display:none;">Delete</button>
+      <div></div>
+      <button class="btn-save" onclick="saveActivity()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Opportunity modal -->
+<div class="overlay" id="oppModalOverlay">
+  <div class="modal">
+    <button class="btn-close" onclick="closeOppModal()">&times;</button>
+    <div class="modal-title">Opportunity</div>
+    <div class="modal-sub" id="oppModalSub">&nbsp;</div>
+
+    <div class="field">
+      <label>Source (if known)</label>
+      <select id="oppSourceSelect"></select>
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="oppDateInput">
+    </div>
+
+    <div class="field">
+      <label>Note</label>
+      <textarea id="oppNoteInput" placeholder="What's the read? Who, what, next step"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <div class="status-row" id="oppStatusRow"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-delete" id="oppDeleteBtn" onclick="deleteOpp()" style="display:none;">Delete</button>
+      <div></div>
+      <button class="btn-save" onclick="saveOpp()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  // ============================================================
+  // Config
+  // ============================================================
+  const STORAGE_KEY = 'sprint-dashboard-data';
+  const RSS_PROXY_URL = 'https://sprint-rss-proxy.cristina-e17.workers.dev/';
+  const DEFAULT_SPRINT_START = '2026-08-24';
+
+  const TYPE_LABELS = { essay: 'Essay', post: 'LinkedIn Post', event: 'Event' };
+  const TYPE_COLORS = { essay: 'var(--mint)', post: 'var(--amber)', event: 'var(--sky)' };
+  const STATUS_LABELS = { new: 'New', warm: 'Warm', converted: 'Converted', dead: 'Dead' };
+
+  let state = { sprintStart: DEFAULT_SPRINT_START, activities: [], opportunities: [], weekNotes: {}, updatedAt: 0 };
+  let activeActivityId = null;
+  let activeActivityType = 'essay';
+  let activeOppId = null;
+  let oppFilter = 'all';
+  let expandedWeek = null;
+
+  function uid(prefix) {
+    return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  }
+
+  function todayStr() {
+    return new Date().toISOString().slice(0,10);
+  }
+
+  // ---------- Week math ----------
+  function weekNumberFor(dateStr) {
+    if (!dateStr) return null;
+    const start = new Date(state.sprintStart + 'T00:00:00');
+    const d = new Date(dateStr + 'T00:00:00');
+    const diffDays = Math.floor((d - start) / 86400000);
+    const wk = Math.floor(diffDays / 7) + 1;
+    if (wk < 1 || wk > 12) return null;
+    return wk;
+  }
+
+  function weekRange(wk) {
+    const start = new Date(state.sprintStart + 'T00:00:00');
+    const s = new Date(start); s.setDate(s.getDate() + (wk-1)*7);
+    const e = new Date(s); e.setDate(e.getDate() + 6);
+    const fmt = d => d.toLocaleDateString([], {month:'short', day:'numeric'});
+    return { start: s, end: e, label: fmt(s) + '–' + fmt(e) };
+  }
+
+  function currentWeek() {
+    const wk = weekNumberFor(todayStr());
+    if (wk) return wk;
+    const start = new Date(state.sprintStart + 'T00:00:00');
+    const today = new Date(todayStr() + 'T00:00:00');
+    return today < start ? 1 : 12;
+  }
+
+  // ---------- Storage ----------
+  const usingClaudeStorage = (typeof window.storage !== 'undefined' && window.storage !== null);
+
+  async function storageRead(key) {
+    if (usingClaudeStorage) {
+      const result = await window.storage.get(key, false);
+      return result && result.value ? result.value : null;
+    }
+    return localStorage.getItem(key);
+  }
+
+  async function storageWrite(key, value) {
+    if (usingClaudeStorage) {
+      await window.storage.set(key, value, false);
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  const UPDATED_AT_KEY = 'sprint-dashboard-updated-at';
+  let lastUpdatedAt = parseInt(localStorage.getItem(UPDATED_AT_KEY) || '0', 10) || 0;
+
+  function touch() {
+    lastUpdatedAt = Date.now();
+    localStorage.setItem(UPDATED_AT_KEY, String(lastUpdatedAt));
+  }
+
+  async function loadState() {
+    try {
+      const raw = await storageRead(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = Object.assign({ sprintStart: DEFAULT_SPRINT_START, activities: [], opportunities: [], weekNotes: {}, updatedAt: 0 }, parsed);
+      }
+    } catch (e) {}
+    render();
+  }
+
+  async function persist() {
+    touch();
+    setStatus('Saving...');
+    try {
+      await storageWrite(STORAGE_KEY, JSON.stringify(state));
+      setStatus('Saved' + (usingClaudeStorage ? '' : ' locally in this browser'));
+      setTimeout(() => setStatus(''), 1800);
+    } catch (e) {
+      setStatus('Save failed — use Export to back up your data');
+    }
+    scheduleDriveWrite();
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status-msg').textContent = msg || ' ';
+  }
+
+  function exportBackup() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = STORAGE_KEY + '-backup-' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function triggerImport() {
+    document.getElementById('import-file-input').click();
+  }
+
+  function importBackup(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (!imported || !Array.isArray(imported.activities)) throw new Error('bad shape');
+        const ok = confirm('This will replace everything currently in the dashboard with this backup. Continue?');
+        if (!ok) return;
+        state = imported;
+        persist();
+        render();
+      } catch (err) {
+        alert('Could not read that file — it doesn’t look like a valid backup.');
+      }
+    };
+    reader.readAsText(file);
+    fileInput.value = '';
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    });
+  });
+
+  // ---------- Render orchestration ----------
+  function render() {
+    renderStats();
+    renderSignalMap();
+    renderWeekList();
+    renderOpportunities();
+  }
+
+  function renderStats() {
+    document.getElementById('stat-week').textContent = currentWeek() + '/12';
+    document.getElementById('stat-activities').textContent = state.activities.length;
+    document.getElementById('stat-leads').textContent = state.opportunities.length;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  // Signal Map
+  // ============================================================
+
+  function renderSignalMap() {
+    const svg = document.getElementById('mapSvg');
+    const legend = document.getElementById('mapLegend');
+    const pace = document.getElementById('paceNote');
+    svg.innerHTML = '';
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const W = 560, CX = 280, CY = 280;
+    const MIN_R = 40, MAX_R = 250;
+    const step = (MAX_R - MIN_R) / 11;
+    const cw = currentWeek();
+
+    // bucket items by week
+    const buckets = {};
+    for (let w = 1; w <= 12; w++) buckets[w] = [];
+    state.activities.forEach(a => {
+      const w = weekNumberFor(a.date);
+      if (w) buckets[w].push({ kind: a.type, color: TYPE_COLORS[a.type], id: a.id, label: a.label });
+    });
+    state.opportunities.forEach(o => {
+      const w = weekNumberFor(o.date);
+      if (w) buckets[w].push({ kind: 'opp', color: 'var(--rose)', id: o.id, note: o.note, status: o.status, sourceId: o.sourceId });
+    });
+
+    const pointCoords = {}; // id -> {x,y}
+
+    // rings
+    for (let w = 1; w <= 12; w++) {
+      const r = MIN_R + step * (w - 1);
+      const track = document.createElementNS(ns, 'circle');
+      track.setAttribute('cx', CX); track.setAttribute('cy', CY); track.setAttribute('r', r);
+      track.setAttribute('class', 'ring-track' + (w === cw ? ' current' : ''));
+      const count = buckets[w].length;
+      if (count > 0) {
+        track.setAttribute('stroke-opacity', String(Math.min(1, 0.35 + count * 0.12)));
+      }
+      svg.appendChild(track);
+
+      const angle = -Math.PI/2 + (w-1) * 0.35;
+      const lx = CX + (r) * Math.cos(angle);
+      const ly = CY + (r) * Math.sin(angle);
+      const label = document.createElementNS(ns, 'text');
+      label.setAttribute('x', lx);
+      label.setAttribute('y', ly);
+      label.setAttribute('class', 'week-label' + (w === cw ? ' current' : ''));
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = 'W' + w;
+      svg.appendChild(label);
+    }
+
+    // sweep group (rotating)
+    const sweepGroup = document.createElementNS(ns, 'g');
+    sweepGroup.setAttribute('class', 'sweep-group');
+    sweepGroup.style.transformOrigin = CX + 'px ' + CY + 'px';
+    const trailR = MAX_R + 10;
+    [ [0, 0.9], [-8, 0.5], [-16, 0.28], [-24, 0.14], [-32, 0.06] ].forEach(([ang, op], i) => {
+      if (i === 0) {
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('class', 'sweep-line');
+        line.setAttribute('x1', CX); line.setAttribute('y1', CY);
+        line.setAttribute('x2', CX + trailR); line.setAttribute('y2', CY);
+        sweepGroup.appendChild(line);
+      } else {
+        const a0 = ang * Math.PI/180, a1 = (ang+8) * Math.PI/180;
+        const x0 = CX + trailR*Math.cos(a0), y0 = CY + trailR*Math.sin(a0);
+        const x1 = CX + trailR*Math.cos(a1), y1 = CY + trailR*Math.sin(a1);
+        const poly = document.createElementNS(ns, 'path');
+        poly.setAttribute('class', 'sweep-trail');
+        poly.setAttribute('d', `M ${CX} ${CY} L ${x0} ${y0} A ${trailR} ${trailR} 0 0 1 ${x1} ${y1} Z`);
+        poly.setAttribute('opacity', op);
+        sweepGroup.appendChild(poly);
+      }
+    });
+    svg.appendChild(sweepGroup);
+
+    // hub
+    const hub = document.createElementNS(ns, 'circle');
+    hub.setAttribute('cx', CX); hub.setAttribute('cy', CY); hub.setAttribute('r', 5);
+    hub.setAttribute('class', 'hub-dot');
+    svg.appendChild(hub);
+    const hubLabel = document.createElementNS(ns, 'text');
+    hubLabel.setAttribute('x', CX); hubLabel.setAttribute('y', CY + 20);
+    hubLabel.setAttribute('text-anchor', 'middle');
+    hubLabel.setAttribute('class', 'hub-label');
+    hubLabel.textContent = 'YOU';
+    svg.appendChild(hubLabel);
+
+    // points
+    for (let w = 1; w <= 12; w++) {
+      const items = buckets[w];
+      if (!items.length) continue;
+      const r = MIN_R + step * (w - 1);
+
+      if (items.length >= 2) {
+        const glow = document.createElementNS(ns, 'circle');
+        glow.setAttribute('cx', CX); glow.setAttribute('cy', CY); glow.setAttribute('r', r);
+        glow.setAttribute('class', 'ring-track');
+        glow.setAttribute('stroke', 'var(--mint)');
+        glow.setAttribute('stroke-opacity', String(Math.min(0.3, items.length * 0.05)));
+        glow.setAttribute('stroke-width', 4);
+        glow.setAttribute('fill', 'none');
+        svg.insertBefore(glow, hub);
+      }
+
+      items.forEach((item, i) => {
+        const angle = (i / items.length) * Math.PI * 2 + (w * 0.5);
+        const x = CX + r * Math.cos(angle);
+        const y = CY + r * Math.sin(angle);
+        pointCoords[item.id] = { x, y };
+
+        const dot = document.createElementNS(ns, 'circle');
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 5);
+        dot.setAttribute('fill', item.color);
+        dot.setAttribute('class', 'signal-dot');
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = item.kind === 'opp' ? ('Lead — ' + (item.note || item.status)) : (TYPE_LABELS[item.kind] + ' — ' + item.label);
+        dot.appendChild(title);
+        dot.addEventListener('click', () => {
+          if (item.kind === 'opp') openOppModal(item.id);
+          else openActivityModal(item.id);
+        });
+        svg.appendChild(dot);
+      });
+    }
+
+    // convert lines
+    state.opportunities.forEach(o => {
+      if (o.status === 'converted' && o.sourceId && pointCoords[o.id] && pointCoords[o.sourceId]) {
+        const p1 = pointCoords[o.sourceId], p2 = pointCoords[o.id];
+        const line = document.createElementNS(ns, 'path');
+        const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+        line.setAttribute('d', `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`);
+        line.setAttribute('class', 'convert-line');
+        svg.insertBefore(line, svg.querySelector('.hub-dot'));
+      }
+    });
+
+    legend.innerHTML = [
+      { label: 'Essay', color: 'var(--mint)' },
+      { label: 'LinkedIn Post', color: 'var(--amber)' },
+      { label: 'Event', color: 'var(--sky)' },
+      { label: 'Inbound Lead', color: 'var(--rose)' }
+    ].map(c => `
+      <div class="map-legend-item">
+        <span class="map-legend-dot" style="background:${c.color}"></span>
+        <span>${c.label}</span>
+      </div>
+    `).join('');
+
+    const totalLogged = state.activities.length + state.opportunities.length;
+    const weeksElapsed = Math.min(cw, 12);
+    const avgPerWeek = weeksElapsed > 0 ? (totalLogged / weeksElapsed).toFixed(1) : '0';
+    pace.textContent = `Week ${cw} of 12 — ${totalLogged} signals logged, averaging ${avgPerWeek}/week`;
+  }
+
+  // ============================================================
+  // Week List
+  // ============================================================
+
+  function renderWeekList() {
+    const wrap = document.getElementById('weekListWrap');
+    const cw = currentWeek();
+    wrap.innerHTML = '';
+
+    for (let w = 1; w <= 12; w++) {
+      const range = weekRange(w);
+      const items = state.activities.filter(a => weekNumberFor(a.date) === w);
+      const note = state.weekNotes[w] || '';
+      const isExpanded = expandedWeek === w;
+
+      const card = document.createElement('div');
+      card.className = 'week-card' + (w === cw ? ' current' : '') + (isExpanded ? ' expanded' : '');
+
+      const essays = items.filter(a => a.type === 'essay');
+      const posts = items.filter(a => a.type === 'post');
+      const events = items.filter(a => a.type === 'event');
+
+      card.innerHTML = `
+        <div class="week-head" data-week="${w}">
+          <div class="week-head-left">
+            <span class="week-num${w === cw ? ' current' : ''}">Week ${w}</span>
+            <span class="week-range">${range.label}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="week-count">${items.length}</span>
+            <span class="week-chevron">&#9656;</span>
+          </div>
+        </div>
+        <div class="week-body">
+          <div class="week-section">
+            <div class="week-section-head">
+              <span class="week-section-title">Essays</span>
+              <button class="btn-mini mint" data-add="essay" data-week="${w}">+ Add</button>
+            </div>
+            ${essays.length ? essays.map(a => activityRowHtml(a)).join('') : '<div class="empty-hint-small">Nothing logged yet.</div>'}
+          </div>
+          <div class="week-section">
+            <div class="week-section-head">
+              <span class="week-section-title">LinkedIn Posts</span>
+              <button class="btn-mini mint" data-add="post" data-week="${w}">+ Add</button>
+            </div>
+            ${posts.length ? posts.map(a => activityRowHtml(a)).join('') : '<div class="empty-hint-small">Nothing logged yet.</div>'}
+          </div>
+          <div class="week-section">
+            <div class="week-section-head">
+              <span class="week-section-title">Events</span>
+              <div style="display:flex; gap:6px;">
+                <button class="btn-mini" data-checkcal="${w}">Check calendar</button>
+                <button class="btn-mini mint" data-add="event" data-week="${w}">+ Add</button>
+              </div>
+            </div>
+            ${events.length ? events.map(a => activityRowHtml(a)).join('') : '<div class="empty-hint-small">Nothing logged yet.</div>'}
+            <div class="candidate-list" id="cal-candidates-${w}"></div>
+          </div>
+          <div class="week-section">
+            <div class="week-section-head"><span class="week-section-title">Notes</span></div>
+            <div class="week-note-field">
+              <textarea data-notefor="${w}" placeholder="Anything worth remembering about this week">${escapeHtml(note)}</textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      wrap.appendChild(card);
+    }
+
+    wrap.querySelectorAll('.week-head').forEach(el => {
+      el.addEventListener('click', () => {
+        const w = parseInt(el.dataset.week, 10);
+        expandedWeek = expandedWeek === w ? null : w;
+        renderWeekList();
+      });
+    });
+    wrap.querySelectorAll('[data-add]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openActivityModal(null, btn.dataset.add, parseInt(btn.dataset.week, 10));
+      });
+    });
+    wrap.querySelectorAll('[data-checkcal]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        checkCalendarForWeek(parseInt(btn.dataset.checkcal, 10));
+      });
+    });
+    wrap.querySelectorAll('.activity-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openActivityModal(row.dataset.id);
+      });
+    });
+    wrap.querySelectorAll('[data-notefor]').forEach(ta => {
+      ta.addEventListener('change', () => {
+        state.weekNotes[ta.dataset.notefor] = ta.value;
+        persist();
+      });
+    });
+  }
+
+  function activityRowHtml(a) {
+    return `
+      <div class="activity-row" data-id="${a.id}">
+        <div class="activity-left">
+          <span class="activity-dot ${a.type}"></span>
+          <span class="activity-label">${escapeHtml(a.label)}</span>
+        </div>
+        <span class="activity-date">${a.date || ''}</span>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  // Activity modal
+  // ============================================================
+
+  function openActivityModal(id, presetType, presetWeek) {
+    activeActivityId = id;
+    const a = id ? state.activities.find(x => x.id === id) : null;
+    activeActivityType = a ? a.type : (presetType || 'essay');
+
+    document.getElementById('activityModalTitle').textContent = a ? 'Edit activity' : 'Log activity';
+    document.getElementById('activityModalSub').textContent = a ? ('Logged ' + (a.date || '—')) : 'Pick a type, fill it in';
+    document.getElementById('activityDeleteBtn').style.display = a ? 'inline-block' : 'none';
+
+    document.getElementById('activityTypeRow').innerHTML = ['essay','post','event'].map(t => `
+      <button type="button" class="type-btn ${t} ${activeActivityType === t ? 'active ' + t : ''}" data-type="${t}">${TYPE_LABELS[t]}</button>
+    `).join('');
+    document.querySelectorAll('#activityTypeRow .type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeActivityType = btn.dataset.type;
+        updateActivityFieldLabels();
+        document.querySelectorAll('#activityTypeRow .type-btn').forEach(b => b.classList.remove('active','essay','post','event'));
+        btn.classList.add('active', activeActivityType);
+      });
+    });
+
+    document.getElementById('activityLabelInput').value = a ? a.label : '';
+    document.getElementById('activityUrlInput').value = a ? (a.url || '') : '';
+    document.getElementById('activityNoteInput').value = a ? (a.note || '') : '';
+    let defaultDate = a ? a.date : todayStr();
+    if (!a && presetWeek) defaultDate = weekRange(presetWeek).start.toISOString().slice(0,10);
+    document.getElementById('activityDateInput').value = defaultDate;
+
+    updateActivityFieldLabels();
+    document.getElementById('activityModalOverlay').classList.add('active');
+  }
+
+  function updateActivityFieldLabels() {
+    const labelLabel = document.getElementById('activityLabelLabel');
+    const urlField = document.getElementById('activityUrlField');
+    const noteField = document.getElementById('activityNoteField');
+    if (activeActivityType === 'essay') {
+      labelLabel.textContent = 'Title';
+      urlField.style.display = 'block';
+      document.getElementById('activityUrlLabel').textContent = 'Substack URL';
+      noteField.style.display = 'none';
+    } else if (activeActivityType === 'post') {
+      labelLabel.textContent = 'Description';
+      urlField.style.display = 'block';
+      document.getElementById('activityUrlLabel').textContent = 'LinkedIn URL';
+      noteField.style.display = 'none';
+    } else {
+      labelLabel.textContent = 'Event name';
+      urlField.style.display = 'none';
+      noteField.style.display = 'block';
+    }
+  }
+
+  function closeActivityModal() {
+    document.getElementById('activityModalOverlay').classList.remove('active');
+    activeActivityId = null;
+  }
+
+  function saveActivity() {
+    const label = document.getElementById('activityLabelInput').value.trim();
+    if (!label) { document.getElementById('activityLabelInput').focus(); return; }
+    const date = document.getElementById('activityDateInput').value || todayStr();
+    const url = document.getElementById('activityUrlInput').value.trim();
+    const note = document.getElementById('activityNoteInput').value.trim();
+
+    if (activeActivityId) {
+      const a = state.activities.find(x => x.id === activeActivityId);
+      if (a) { a.type = activeActivityType; a.label = label; a.date = date; a.url = url; a.note = note; }
+    } else {
+      state.activities.push({ id: uid('a'), type: activeActivityType, label, date, url, note, source: 'manual' });
+    }
+    persist();
+    render();
+    closeActivityModal();
+  }
+
+  function deleteActivity() {
+    if (!activeActivityId) return;
+    state.activities = state.activities.filter(x => x.id !== activeActivityId);
+    state.opportunities.forEach(o => { if (o.sourceId === activeActivityId) o.sourceId = null; });
+    persist();
+    render();
+    closeActivityModal();
+  }
+
+  // ============================================================
+  // Opportunities
+  // ============================================================
+
+  function renderOpportunities() {
+    const filtersEl = document.getElementById('oppFilters');
+    const listEl = document.getElementById('oppListWrap');
+
+    filtersEl.innerHTML = ['all','new','warm','converted','dead'].map(f => `
+      <button type="button" class="opp-filter-btn ${oppFilter === f ? 'active' : ''}" data-filter="${f}">${f === 'all' ? 'All' : STATUS_LABELS[f]}</button>
+    `).join('');
+    filtersEl.querySelectorAll('.opp-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => { oppFilter = btn.dataset.filter; renderOpportunities(); });
+    });
+
+    const items = state.opportunities
+      .filter(o => oppFilter === 'all' || o.status === oppFilter)
+      .sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+
+    if (!items.length) {
+      listEl.innerHTML = '<div class="empty-hint-small">No opportunities logged yet.</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map(o => {
+      const source = o.sourceId ? state.activities.find(a => a.id === o.sourceId) : null;
+      return `
+        <div class="opp-card" data-id="${o.id}">
+          <div class="opp-top">
+            <span class="opp-tag ${o.status}">${STATUS_LABELS[o.status]}</span>
+            <span style="font-family:var(--font-display); font-size:12px; color:var(--text-faint);">${o.date || ''}</span>
+          </div>
+          ${o.note ? `<div class="opp-note">${escapeHtml(o.note)}</div>` : ''}
+          <div class="opp-meta">
+            <span>${source ? 'From: ' + escapeHtml(source.label) : 'Source unknown'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.opp-card').forEach(card => {
+      card.addEventListener('click', () => openOppModal(card.dataset.id));
+    });
+  }
+
+  function openOppModal(id) {
+    activeOppId = id;
+    const o = id ? state.opportunities.find(x => x.id === id) : null;
+
+    document.getElementById('oppModalSub').textContent = o ? ('Logged ' + (o.date || '—')) : 'New inbound opportunity';
+    document.getElementById('oppDeleteBtn').style.display = o ? 'inline-block' : 'none';
+
+    const select = document.getElementById('oppSourceSelect');
+    const sorted = state.activities.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    select.innerHTML = '<option value="">Unknown / not sure</option>' + sorted.map(a =>
+      `<option value="${a.id}">${TYPE_LABELS[a.type]} — ${escapeHtml(a.label)} (${a.date})</option>`
+    ).join('');
+    select.value = o && o.sourceId ? o.sourceId : '';
+
+    document.getElementById('oppDateInput').value = o ? o.date : todayStr();
+    document.getElementById('oppNoteInput').value = o ? (o.note || '') : '';
+
+    const status = o ? o.status : 'new';
+    document.getElementById('oppStatusRow').innerHTML = ['new','warm','converted','dead'].map(s => `
+      <button type="button" class="status-btn ${s} ${status === s ? 'active ' + s : ''}" data-status="${s}">${STATUS_LABELS[s]}</button>
+    `).join('');
+    document.querySelectorAll('#oppStatusRow .status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#oppStatusRow .status-btn').forEach(b => b.className = 'status-btn ' + b.dataset.status);
+        btn.classList.add('active', btn.dataset.status);
+      });
+    });
+
+    document.getElementById('oppModalOverlay').classList.add('active');
+  }
+
+  function closeOppModal() {
+    document.getElementById('oppModalOverlay').classList.remove('active');
+    activeOppId = null;
+  }
+
+  function saveOpp() {
+    const date = document.getElementById('oppDateInput').value || todayStr();
+    const note = document.getElementById('oppNoteInput').value.trim();
+    const sourceId = document.getElementById('oppSourceSelect').value || null;
+    const activeStatusBtn = document.querySelector('#oppStatusRow .status-btn.active');
+    const status = activeStatusBtn ? activeStatusBtn.dataset.status : 'new';
+
+    if (activeOppId) {
+      const o = state.opportunities.find(x => x.id === activeOppId);
+      if (o) { o.date = date; o.note = note; o.sourceId = sourceId; o.status = status; }
+    } else {
+      state.opportunities.push({ id: uid('o'), date, note, sourceId, status });
+    }
+    persist();
+    render();
+    closeOppModal();
+  }
+
+  function deleteOpp() {
+    if (!activeOppId) return;
+    state.opportunities = state.opportunities.filter(x => x.id !== activeOppId);
+    persist();
+    render();
+    closeOppModal();
+  }
+
+  // ============================================================
+  // Substack RSS check (essays) — via CORS proxy
+  // ============================================================
+
+  async function checkForNewEssays() {
+    if (!RSS_PROXY_URL || RSS_PROXY_URL.indexOf('PLACEHOLDER') !== -1) return;
+    try {
+      const resp = await fetch(RSS_PROXY_URL);
+      if (!resp.ok) return;
+      const text = await resp.text();
+      const doc = new DOMParser().parseFromString(text, 'text/xml');
+      const items = Array.from(doc.querySelectorAll('item'));
+      let added = false;
+      items.forEach(item => {
+        const title = item.querySelector('title')?.textContent || '';
+        const link = item.querySelector('link')?.textContent || '';
+        const pubDate = item.querySelector('pubDate')?.textContent || '';
+        if (!link) return;
+        const exists = state.activities.some(a => a.type === 'essay' && a.url === link);
+        if (exists) return;
+        const date = pubDate ? new Date(pubDate).toISOString().slice(0,10) : todayStr();
+        state.activities.push({ id: uid('a'), type: 'essay', label: title, date, url: link, note: '', source: 'rss' });
+        added = true;
+      });
+      if (added) { persist(); render(); showToast('New essay(s) pulled in from Substack'); }
+    } catch (e) {}
+  }
+
+  function showToast(msg) {
+    setStatus(msg);
+    setTimeout(() => setStatus(''), 2500);
+  }
+
+  // ============================================================
+  // Google Calendar candidate events
+  // ============================================================
+
+  async function checkCalendarForWeek(w) {
+    const holder = document.getElementById('cal-candidates-' + w);
+    if (!holder) return;
+    if (!driveState.signedIn) { holder.innerHTML = '<div class="empty-hint-small">Sign in to sync (top right) to pull calendar events.</div>'; return; }
+    holder.innerHTML = '<div class="empty-hint-small">Checking calendar…</div>';
+
+    ensureValidToken(ok => {
+      if (!ok) { holder.innerHTML = '<div class="empty-hint-small">Could not access calendar.</div>'; return; }
+      const range = weekRange(w);
+      const timeMin = new Date(range.start); timeMin.setHours(0,0,0,0);
+      const timeMax = new Date(range.end); timeMax.setHours(23,59,59,999);
+      const params = new URLSearchParams({
+        timeMin: timeMin.toISOString(),
+        timeMax: timeMax.toISOString(),
+        singleEvents: 'true',
+        orderBy: 'startTime',
+        maxResults: '20'
+      });
+      driveFetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+          const events = (data.items || []).filter(ev => ev.status !== 'cancelled');
+          if (!events.length) { holder.innerHTML = '<div class="empty-hint-small">No calendar events found this week.</div>'; return; }
+          holder.innerHTML = events.map(ev => {
+            const start = ev.start && (ev.start.date || (ev.start.dateTime || '').slice(0,10));
+            return `
+              <div class="candidate-row">
+                <span>${escapeHtml(ev.summary || '(untitled)')} — ${start || ''}</span>
+                <button type="button" class="btn-mini mint" data-addcal='${JSON.stringify({name: ev.summary || '', date: start || todayStr()}).replace(/'/g, "&#39;")}'>+ Add</button>
+              </div>
+            `;
+          }).join('');
+          holder.querySelectorAll('[data-addcal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const info = JSON.parse(btn.dataset.addcal);
+              openActivityModal(null, 'event', null);
+              document.getElementById('activityLabelInput').value = info.name;
+              document.getElementById('activityDateInput').value = info.date;
+            });
+          });
+        })
+        .catch(() => { holder.innerHTML = '<div class="empty-hint-small">Calendar check failed.</div>'; });
+    });
+  }
+
+  // ============================================================
+  // Google Drive sync
+  // ============================================================
+
+  const GOOGLE_CLIENT_ID = "977352598129-rahsvdmk1na65u4qp4blansf5mvhm6m7.apps.googleusercontent.com";
+  const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
+  const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+  const GOOGLE_SCOPES = DRIVE_SCOPE + " " + CALENDAR_SCOPE;
+  const DRIVE_FILENAME = "sprint-dashboard-data.json";
+  const TOKEN_KEY = "sprint-dashboard-drive-token";
+
+  const driveState = {
+    tokenClient: null,
+    accessToken: null,
+    tokenExpiry: 0,
+    fileId: null,
+    online: navigator.onLine,
+    signedIn: false,
+    lastError: null
+  };
+
+  function loadStoredToken() {
+    try {
+      const raw = localStorage.getItem(TOKEN_KEY);
+      if (!raw) return;
+      const t = JSON.parse(raw);
+      if (t && t.accessToken && t.expiry > Date.now()) {
+        driveState.accessToken = t.accessToken;
+        driveState.tokenExpiry = t.expiry;
+        driveState.signedIn = true;
+      }
+    } catch (e) {}
+  }
+
+  function storeToken(accessToken, expiresInSeconds) {
+    driveState.accessToken = accessToken;
+    driveState.tokenExpiry = Date.now() + expiresInSeconds * 1000;
+    driveState.signedIn = true;
+    localStorage.setItem(TOKEN_KEY, JSON.stringify({ accessToken, expiry: driveState.tokenExpiry }));
+  }
+
+  function clearToken() {
+    driveState.accessToken = null;
+    driveState.tokenExpiry = 0;
+    driveState.signedIn = false;
+    localStorage.removeItem(TOKEN_KEY);
+  }
+
+  function refreshSyncUI() {
+    const el = document.getElementById('syncStatus');
+    const label = document.getElementById('syncStatusLabel');
+    let mode = 'signedout', text = 'Sign in to sync';
+    if (!driveState.online) { mode = 'offline'; text = 'Offline — will sync'; }
+    else if (!driveState.signedIn) { mode = 'signedout'; text = 'Sign in to sync'; }
+    else if (driveState.lastError) { mode = 'error'; text = 'Sync error — retrying'; }
+    else { mode = 'synced'; text = 'Synced'; }
+    el.className = 'sync-status ' + mode;
+    label.textContent = text;
+  }
+
+  window.addEventListener('online', () => { driveState.online = true; refreshSyncUI(); trySyncFromDrive(); });
+  window.addEventListener('offline', () => { driveState.online = false; refreshSyncUI(); });
+
+  function initGoogleAuth() {
+    if (typeof google === 'undefined' || !google.accounts) { refreshSyncUI(); return; }
+    driveState.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GOOGLE_SCOPES,
+      callback: function (resp) {
+        if (resp && resp.access_token) {
+          storeToken(resp.access_token, resp.expires_in || 3500);
+          refreshSyncUI();
+          closeSyncModal();
+          setStatus('Connected to Google Drive');
+          trySyncFromDrive();
+        }
+      }
+    });
+    loadStoredToken();
+    refreshSyncUI();
+    if (driveState.signedIn) trySyncFromDrive();
+  }
+
+  function requestSignIn() {
+    if (!driveState.tokenClient) {
+      alert('Google sign-in is still loading — try again in a moment.');
+      return;
+    }
+    driveState.tokenClient.requestAccessToken({ prompt: driveState.signedIn ? '' : 'consent' });
+  }
+
+  function disconnectDrive() {
+    if (!confirm('Disconnect Google Drive? Your data will stay on this device but will stop syncing.')) return;
+    clearToken();
+    driveState.fileId = null;
+    refreshSyncUI();
+    closeSyncModal();
+    setStatus('Disconnected from Google Drive');
+  }
+
+  function ensureValidToken(cb) {
+    if (driveState.accessToken && Date.now() < driveState.tokenExpiry - 30000) { cb(true); return; }
+    if (!driveState.tokenClient) { cb(false); return; }
+    driveState.tokenClient.callback = function (resp) {
+      if (resp && resp.access_token) {
+        storeToken(resp.access_token, resp.expires_in || 3500);
+        cb(true);
+      } else {
+        cb(false);
+      }
+    };
+    driveState.tokenClient.requestAccessToken({ prompt: '' });
+  }
+
+  function driveFetch(url, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    opts.headers['Authorization'] = 'Bearer ' + driveState.accessToken;
+    return fetch(url, opts);
+  }
+
+  function findDriveFile(cb) {
+    const params = new URLSearchParams({
+      spaces: 'appDataFolder',
+      q: `name='${DRIVE_FILENAME}' and trashed=false`,
+      fields: 'files(id,name,modifiedTime)',
+      orderBy: 'modifiedTime desc'
+    });
+    driveFetch('https://www.googleapis.com/drive/v3/files?' + params.toString())
+      .then(r => r.json().then(data => ({ ok: r.ok, data })))
+      .then(res => {
+        if (!res.ok) {
+          driveState.lastError = (res.data && res.data.error) || new Error('Drive lookup failed');
+          refreshSyncUI();
+          cb(null, driveState.lastError);
+          return;
+        }
+        const files = res.data.files || [];
+        if (!files.length) { cb(null); return; }
+        driveState.fileId = files[0].id;
+        if (files.length > 1) {
+          files.slice(1).forEach(dupe => {
+            driveFetch('https://www.googleapis.com/drive/v3/files/' + dupe.id, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ trashed: true })
+            }).catch(() => {});
+          });
+        }
+        cb(driveState.fileId);
+      })
+      .catch(err => { driveState.lastError = err; refreshSyncUI(); cb(null, err); });
+  }
+
+  function downloadDriveFile(fileId, cb) {
+    driveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media')
+      .then(r => r.json())
+      .then(data => cb(data))
+      .catch(err => { driveState.lastError = err; refreshSyncUI(); cb(null, err); });
+  }
+
+  function createDriveFile(payload, cb) {
+    const metadata = { name: DRIVE_FILENAME, parents: ['appDataFolder'] };
+    const boundary = '-------sprintdashboardboundary';
+    const body =
+      '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' +
+      JSON.stringify(payload) + '\r\n' +
+      '--' + boundary + '--';
+
+    driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+      body
+    }).then(r => r.json())
+      .then(data => { driveState.fileId = data.id; cb(true); })
+      .catch(err => { driveState.lastError = err; refreshSyncUI(); cb(false, err); });
+  }
+
+  function updateDriveFile(fileId, payload, cb) {
+    driveFetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(r => {
+      if (!r.ok) throw new Error('Drive write failed: ' + r.status);
+      driveState.lastError = null;
+      cb(true);
+    }).catch(err => { driveState.lastError = err; refreshSyncUI(); cb(false, err); });
+  }
+
+  function currentPayload() {
+    return Object.assign({}, state, { updatedAt: lastUpdatedAt });
+  }
+
+  function writeToDrive() {
+    if (!driveState.online || !driveState.signedIn) return;
+    ensureValidToken(ok => {
+      if (!ok) return;
+      const payload = currentPayload();
+      if (driveState.fileId) {
+        updateDriveFile(driveState.fileId, payload, () => refreshSyncUI());
+      } else {
+        findDriveFile((fileId, err) => {
+          if (fileId) {
+            updateDriveFile(fileId, payload, () => refreshSyncUI());
+          } else if (!err) {
+            createDriveFile(payload, () => refreshSyncUI());
+          } else {
+            refreshSyncUI();
+          }
+        });
+      }
+    });
+  }
+
+  let writeDebounceTimer;
+  function scheduleDriveWrite() {
+    if (!driveState.signedIn) return;
+    clearTimeout(writeDebounceTimer);
+    writeDebounceTimer = setTimeout(writeToDrive, 1500);
+  }
+
+  function forceSyncNow() {
+    touch();
+    setStatus('Syncing…');
+    writeToDrive();
+  }
+
+  function trySyncFromDrive() {
+    if (!driveState.online || !driveState.signedIn) return;
+    ensureValidToken(ok => {
+      if (!ok) return;
+      refreshSyncUI();
+      findDriveFile((fileId, err) => {
+        if (!fileId) {
+          if (err) { refreshSyncUI(); return; }
+          createDriveFile(currentPayload(), () => refreshSyncUI());
+          return;
+        }
+        downloadDriveFile(fileId, remote => {
+          if (!remote) { refreshSyncUI(); return; }
+          const remoteUpdatedAt = typeof remote.updatedAt === 'number' ? remote.updatedAt : 0;
+          if (remoteUpdatedAt >= lastUpdatedAt) {
+            state = Object.assign({ sprintStart: DEFAULT_SPRINT_START, activities: [], opportunities: [], weekNotes: {}, updatedAt: 0 }, remote);
+            lastUpdatedAt = remoteUpdatedAt;
+            localStorage.setItem(UPDATED_AT_KEY, String(lastUpdatedAt));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            render();
+          }
+          refreshSyncUI();
+        });
+      });
+    });
+  }
+
+  function openSyncModal() {
+    document.getElementById('connectDriveBtn').style.display = driveState.signedIn ? 'none' : 'inline-block';
+    document.getElementById('disconnectDriveBtn').style.display = driveState.signedIn ? 'inline-block' : 'none';
+    document.getElementById('syncNowBtn').style.display = driveState.signedIn ? 'inline-block' : 'none';
+    let bodyText = driveState.signedIn
+      ? 'Connected. Your data syncs automatically to a hidden folder in your Google Drive, and Calendar access is used to suggest events.'
+      : 'Connect Google Drive so this dashboard stays the same on your phone and your laptop, and to pull candidate events from your Calendar.';
+    if (driveState.lastError) {
+      const msg = driveState.lastError.message || (driveState.lastError.error && driveState.lastError.error.message) || JSON.stringify(driveState.lastError);
+      bodyText += '\n\nLast sync error: ' + msg;
+    }
+    const bodyEl = document.getElementById('syncModalBody');
+    bodyEl.textContent = bodyText;
+    bodyEl.style.whiteSpace = 'pre-wrap';
+    document.getElementById('syncModalOverlay').classList.add('active');
+  }
+
+  function closeSyncModal() {
+    document.getElementById('syncModalOverlay').classList.remove('active');
+  }
+
+  document.getElementById('syncStatus').addEventListener('click', openSyncModal);
+  document.getElementById('syncModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'syncModalOverlay') closeSyncModal();
+  });
+  document.getElementById('activityModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'activityModalOverlay') closeActivityModal();
+  });
+  document.getElementById('oppModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'oppModalOverlay') closeOppModal();
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+
+  loadState().then(() => { checkForNewEssays(); });
+  refreshSyncUI();
+
+  window.addEventListener('load', function () {
+    let tries = 0;
+    (function waitForGis() {
+      tries++;
+      if (typeof google !== 'undefined' && google.accounts) {
+        initGoogleAuth();
+      } else if (tries < 40) {
+        setTimeout(waitForGis, 125);
+      } else {
+        refreshSyncUI();
+      }
+    })();
+  });
+</script>
+</body>
+</html>
