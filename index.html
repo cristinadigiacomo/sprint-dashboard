@@ -1359,9 +1359,10 @@
         const link = item.querySelector('link')?.textContent || '';
         const pubDate = item.querySelector('pubDate')?.textContent || '';
         if (!link) return;
+        const date = pubDate ? new Date(pubDate).toISOString().slice(0,10) : todayStr();
+        if (date < state.sprintStart) return; // predates the sprint — not tracked
         const exists = state.activities.some(a => a.type === 'essay' && a.url === link);
         if (exists) return;
-        const date = pubDate ? new Date(pubDate).toISOString().slice(0,10) : todayStr();
         state.activities.push({ id: uid('a'), type: 'essay', label: title, date, url: link, note: '', source: 'rss' });
         added = true;
       });
